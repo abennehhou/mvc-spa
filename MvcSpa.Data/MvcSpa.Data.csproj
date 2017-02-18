@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DisplayMode.cs" />
     <Compile Include="EventCommandType.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="ProductRepository.cs" />

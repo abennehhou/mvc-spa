@@ -8,6 +8,8 @@
 {
     <!-- Begin hidden fields area -->
     @Html.HiddenFor(m => m.EventCommand)
+    @Html.HiddenFor(m => m.EventArgument)
+    @Html.HiddenFor(m => m.Mode)
     <!-- End hidden fields area -->
 
     <!-- Begin search area -->
@@ -65,6 +67,7 @@
                     </div>
                 </div>
                 <!-- End Message Area -->
+                @Html.HiddenFor(m => m.Entity.Id)
                 <div class="form-group">
                     @Html.LabelFor(m => m.Entity.Name)
                     @Html.TextBoxFor(m => m.Entity.Name, new { @class = "form-control" })
@@ -107,20 +110,36 @@
             <table class="table table-bordered table-condensed table-striped table-hover">
                 <thead>
                     <tr>
+                        <th class="action-button-column">Edit</th>
                         <th>Product Name</th>
                         <th>Introduction Date</th>
                         <th>Url</th>
                         <th>Price</th>
+                        <th class="action-button-column">Delete</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model.Products)
                     {
                         <tr>
+                            <td class="action-button-column">
+                                <a href="#" data-product-action="Edit"
+                                   data-product-val="@item.Id"
+                                   class="btn btn-default btn-sm">
+                                    <i class="glyphicon glyphicon-edit"></i>
+                                </a>
+                            </td>
                             <td>@item.Name</td>
                             <td>@item.IntroductionDate</td>
                             <td>@item.Url</td>
                             <td>@item.Price.ToString("c")</td>
+                            <td class="action-button-column">
+                                <a href="#" data-product-action="Delete"
+                                   data-product-val="@item.Id"
+                                   class="btn btn-default btn-sm">
+                                    <i class="glyphicon glyphicon-trash"></i>
+                                </a>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -137,8 +156,10 @@
         $(document).ready(function () {
             $("[data-product-action]").on("click", function (e) {
                 e.preventDefault();
-                var newEventValue = $(this).attr("data-product-action");
-                $("#EventCommand").val(newEventValue);
+                var newEventAction = $(this).attr("data-product-action");
+                $("#EventCommand").val(newEventAction);
+                var newEventArgumentValue = $(this).attr("data-product-val");
+                $("#EventArgument").val(newEventArgumentValue);
                 $("form").submit();
             });
         });

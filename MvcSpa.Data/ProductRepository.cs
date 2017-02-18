@@ -13,7 +13,7 @@ namespace MvcSpa.Data
                 Id = Guid.NewGuid(),
                 Name = "Pen",
                 IntroductionDate = new DateTime(2015, 01, 02),
-                Url = "http://my-domain/pen",
+                Url = "http://my-domain.com/pen",
                 Price = 1.02m
             },
             new Product
@@ -21,7 +21,7 @@ namespace MvcSpa.Data
                 Id = Guid.NewGuid(),
                 Name = "Pinapple",
                 IntroductionDate = new DateTime(2015, 01, 22),
-                Url = "http://my-domain/pinapple",
+                Url = "http://my-domain.com/pinapple",
                 Price = 2.05m
             },
             new Product
@@ -29,12 +29,12 @@ namespace MvcSpa.Data
                 Id = Guid.NewGuid(),
                 Name = "Apple",
                 IntroductionDate = new DateTime(2015, 01, 13),
-                Url = "http://my-domain/apple",
+                Url = "http://my-domain.com/apple",
                 Price = 1.42m
             }
         };
 
-        public List<Product> Get(SearchProductFilter filter)
+        public List<Product> Search(SearchProductFilter filter)
         {
             //TODO Use non mocked data
             var products = GetProductsQueryableData();
@@ -49,9 +49,14 @@ namespace MvcSpa.Data
             return products.ToList();
         }
 
+        public Product Get(Guid productId)
+        {
+            return GetProductsQueryableData().FirstOrDefault(product => product.Id == productId);
+        }
+
         public List<KeyValuePair<string, string>> Insert(Product entity)
         {
-            var validationErrors = ValidateNewProduct(entity);
+            var validationErrors = ValidateProduct(entity);
             if (!validationErrors.Any())
             {
                 entity.Id = Guid.NewGuid();
@@ -69,11 +74,39 @@ namespace MvcSpa.Data
             return validationErrors;
         }
 
-        private List<KeyValuePair<string, string>> ValidateNewProduct(Product entity)
+        public List<KeyValuePair<string, string>> Update(Product entity)
+        {
+            var validationErrors = ValidateProduct(entity);
+            if (!validationErrors.Any())
+            {
+                var databaseEntity = Get(entity.Id);
+                if (databaseEntity != null)
+                {
+                    databaseEntity.IntroductionDate = entity.IntroductionDate;
+                    databaseEntity.Name = entity.Name;
+                    databaseEntity.Price = entity.Price;
+                    databaseEntity.Url = entity.Url;
+                }
+            }
+
+            return validationErrors;
+        }
+
+        public bool Delete(Guid productId)
+        {
+            var databaseEntity = Get(productId);
+            if (databaseEntity != null)
+                return _mockedData.Remove(databaseEntity);
+
+            return false;
+        }
+
+        private List<KeyValuePair<string, string>> ValidateProduct(Product entity)
         {
             var validationErrors = new List<KeyValuePair<string, string>>();
             var products = GetProductsQueryableData();
-            if (products.Any(product => string.Equals(product.Name, entity.Name, StringComparison.OrdinalIgnoreCase)))
+            if (products.Any(product => product.Id != entity.Id
+                                        && string.Equals(product.Name, entity.Name, StringComparison.OrdinalIgnoreCase)))
             {
                 validationErrors.Add(new KeyValuePair<string, string>("Name", "Product name already exists."));
             }

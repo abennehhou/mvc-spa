@@ -17,6 +17,16 @@ namespace MvcSpa.Data
         public EventCommandType EventCommand { get; set; }
 
         /// <summary>
+        /// Display mode, if any
+        /// </summary>
+        public DisplayMode? Mode { get; set; }
+
+        /// <summary>
+        /// Argument passed with the command.
+        /// </summary>
+        public string EventArgument { get; set; }
+
+        /// <summary>
         /// Contains search filters on product.
         /// </summary>
         public SearchProductFilter SearchEntity { get; set; }
@@ -64,7 +74,8 @@ namespace MvcSpa.Data
             ValidationErrors = new List<KeyValuePair<string, string>>();
 
             EventCommand = EventCommandType.List;
-            SetListMode();
+            EventArgument = null;
+            SetListVisibility();
         }
 
         public void HandleRequest()
@@ -74,11 +85,11 @@ namespace MvcSpa.Data
                 case EventCommandType.List:
                 case EventCommandType.Search:
                 case EventCommandType.Cancel:
-                    SetListMode();
+                    SetListVisibility();
                     Get();
                     break;
                 case EventCommandType.ResetSearch:
-                    SetListMode();
+                    SetListVisibility();
                     ResetSearch();
                     Get();
                     break;
@@ -88,12 +99,18 @@ namespace MvcSpa.Data
                 case EventCommandType.Save:
                     Save();
                     break;
+                case EventCommandType.Edit:
+                    Edit();
+                    break;
+                case EventCommandType.Delete:
+                    Delete();
+                    break;
                 default:
                     break;
             }
         }
 
-        private void SetListMode()
+        private void SetListVisibility()
         {
             IsValid = true;
             IsSearchAreaVisible = true;
@@ -101,7 +118,7 @@ namespace MvcSpa.Data
             IsDetailAreaVisible = false;
         }
 
-        private void SetAddMode()
+        private void SetDetailsVisibility()
         {
             IsSearchAreaVisible = false;
             IsListAreaVisible = false;
@@ -118,31 +135,66 @@ namespace MvcSpa.Data
                 Price = 0m
             };
 
-            SetAddMode();
+            SetDetailsVisibility();
+            Mode = DisplayMode.Add;
+        }
+
+        private void Edit()
+        {
+            IsValid = true;
+            Guid productId;
+            Guid.TryParse(EventArgument, out productId);
+            Entity = _productRepository.Get(productId);
+            if (Entity == null)
+                throw new Exception($"Product {EventArgument} not found.");
+
+            SetDetailsVisibility();
+            Mode = DisplayMode.Edit;
+        }
+
+        private void Delete()
+        {
+            IsValid = true;
+            Guid productId;
+            Guid.TryParse(EventArgument, out productId);
+            var isDeleted = _productRepository.Delete(productId);
+            SetListVisibility();
+            Mode = null;
+            Get();
         }
 
         private void Save()
         {
             if (IsValid)
             {
-                ValidationErrors = _productRepository.Insert(Entity);
+                if (Mode == DisplayMode.Add)
+                {
+                    ValidationErrors = _productRepository.Insert(Entity);
+                }
+                else if (Mode == DisplayMode.Edit)
+                {
+                    ValidationErrors = _productRepository.Update(Entity);
+                }
+                else
+                    throw new Exception("Unknown mode during save");
+
                 IsValid = !ValidationErrors.Any();
             }
 
             if (IsValid)
             {
-                SetListMode();
+                SetListVisibility();
                 Get();
             }
             else
             {
-                SetAddMode();
+                SetDetailsVisibility();
             }
         }
 
         private void Get()
         {
-            Products = _productRepository.Get(SearchEntity);
+            Products = _productRepository.Search(SearchEntity);
         }
 
         private void ResetSearch()

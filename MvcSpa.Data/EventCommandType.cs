@@ -7,6 +7,8 @@
         ResetSearch,
         Add,
         Save,
-        Cancel
+        Cancel,
+        Edit,
+        Delete
     }
 }
