@@ -1,3 +1,61 @@
-﻿@{
+﻿@using MvcSpa.Data
+@model List<Product>
+@{
     ViewBag.Title = "My Company";
+}
+
+@using (Html.BeginForm())
+{
+    <!-- Begin hidden fields area -->
+    <!-- End hidden fields area -->
+
+    <!-- Begin search area -->
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h1 class="panel-title">Search for products</h1>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                @Html.Label("Product Name")
+                @Html.TextBox("SearchProductName", string.Empty, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button id="btnSearch" class="btn btn-sm btn-primary">Search</button>
+            <button id="btnReset" class="btn btn-sm btn-primary">Reset</button>
+        </div>
+    </div>
+    <!-- End search area -->
+
+    <!-- Begin list area -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Introduction Date</th>
+                    <th>Url</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in Model)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.IntroductionDate</td>
+                        <td>@item.Url</td>
+                        <td>@item.Price.ToString("c")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <!-- End list area -->
+}
+@section scripts
+{
+    <script>
+
+    </script>
 }

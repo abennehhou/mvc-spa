@@ -160,7 +160,12 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\MvcSpa.Data\MvcSpa.Data.csproj">
+      <Project>{1ab1cd51-8892-43d8-8c74-d658e87fa91e}</Project>
+      <Name>MvcSpa.Data</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />

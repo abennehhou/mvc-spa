@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MvcSpa.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,7 +11,11 @@ namespace MvcSpa.Controllers
     {
         public ActionResult Index()
         {
-            return View();
+            //TODO use dependency injection.
+            var productRepository = new ProductRepository();
+            var products = productRepository.Get();
+
+            return View(products);
         }
     }
 }
