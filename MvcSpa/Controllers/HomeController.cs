@@ -1,8 +1,4 @@
 ﻿using MvcSpa.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace MvcSpa.Controllers
@@ -11,11 +7,22 @@ namespace MvcSpa.Controllers
     {
         public ActionResult Index()
         {
-            //TODO use dependency injection.
-            var productRepository = new ProductRepository();
-            var products = productRepository.Get();
+            var productViewModel = new ProductViewModel();
+            productViewModel.HandleRequest();
 
-            return View(products);
+            return View(productViewModel);
+        }
+
+        [HttpPost]
+        public ActionResult Index(ProductViewModel productViewModel)
+        {
+            productViewModel.HandleRequest();
+
+            ModelState.Clear();
+
+            //TODO We should redirect to an action instead of returning a view in the HttpPost :(
+            // If we do so, we will avoid posting the form when we refresh the page.   
+            return View(productViewModel);
         }
     }
 }

@@ -1,12 +1,13 @@
 ﻿@using MvcSpa.Data
-@model List<Product>
+@model ProductViewModel
 @{
     ViewBag.Title = "My Company";
 }
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("Index", "Home"))
 {
     <!-- Begin hidden fields area -->
+    @Html.HiddenFor(m => m.EventCommand)
     <!-- End hidden fields area -->
 
     <!-- Begin search area -->
@@ -16,13 +17,19 @@
         </div>
         <div class="panel-body">
             <div class="form-group">
-                @Html.Label("Product Name")
-                @Html.TextBox("SearchProductName", string.Empty, new { @class = "form-control" })
+                @Html.LabelFor(m => m.SearchEntity.Name, "Product Name")
+                @Html.TextBoxFor(m => m.SearchEntity.Name, new { @class = "form-control" })
             </div>
         </div>
         <div class="panel-footer">
-            <button id="btnSearch" class="btn btn-sm btn-primary">Search</button>
-            <button id="btnReset" class="btn btn-sm btn-primary">Reset</button>
+            <button id="search-product-btn" data-product-action="Search" class="btn btn-sm btn-primary">
+                <i class="glyphicon glyphicon-search"></i>
+                &nbsp;Search
+            </button>
+            <button id="reset-search-product-btn" data-product-action="ResetSearch" class="btn btn-sm btn-default">
+                <i class="glyphicon glyphicon-share-alt"></i>
+                &nbsp;Reset
+            </button>
         </div>
     </div>
     <!-- End search area -->
@@ -39,7 +46,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach(var item in Model)
+                @foreach (var item in Model.Products)
                 {
                     <tr>
                         <td>@item.Name</td>
@@ -56,6 +63,15 @@
 @section scripts
 {
     <script>
+
+        $(document).ready(function () {
+            $("[data-product-action]").on("click", function (e) {
+                e.preventDefault();
+                var newEventValue = $(this).attr("data-product-action");
+                $("#EventCommand").val(newEventValue);
+                $("form").submit();
+            });
+        });
 
     </script>
 }

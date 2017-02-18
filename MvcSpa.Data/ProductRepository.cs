@@ -1,19 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MvcSpa.Data
 {
     public class ProductRepository
     {
-        public List<Product> Get()
+        public List<Product> Get(SearchProductFilter filter)
         {
             //TODO Use non mocked data
-            return CreateMockData();
+            var products = GetProductsQueryableData();
+            if (filter != null)
+            {
+                if (!string.IsNullOrEmpty(filter.Name))
+                    products = products
+                        .Where(product => product.Name != null
+                                            && product.Name.StartsWith(filter.Name, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            return products.ToList();
         }
 
-        private List<Product> CreateMockData()
+        private IQueryable<Product> GetProductsQueryableData()
         {
-            return new List<Product>
+            var mockedData = new List<Product>
             {
                 new Product
                 {
@@ -40,6 +50,8 @@ namespace MvcSpa.Data
                     Price = 1.42m
                 }
             };
+
+            return mockedData.AsQueryable();
         }
     }
 }
