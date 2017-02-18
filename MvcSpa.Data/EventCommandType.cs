@@ -4,6 +4,9 @@
     {
         List,
         Search,
-        ResetSearch
+        ResetSearch,
+        Add,
+        Save,
+        Cancel
     }
 }
