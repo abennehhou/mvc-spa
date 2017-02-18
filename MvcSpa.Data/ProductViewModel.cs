@@ -1,30 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MvcSpa.Data
 {
-    public class ProductViewModel
+    public class ProductViewModel : ViewModelBase
     {
         /// <summary>
         /// List of products to display.
         /// </summary>
         public List<Product> Products { get; set; }
-
-        /// <summary>
-        /// Type of event command
-        /// </summary>
-        public EventCommandType EventCommand { get; set; }
-
-        /// <summary>
-        /// Display mode, if any
-        /// </summary>
-        public DisplayMode? Mode { get; set; }
-
-        /// <summary>
-        /// Argument passed with the command.
-        /// </summary>
-        public string EventArgument { get; set; }
 
         /// <summary>
         /// Contains search filters on product.
@@ -36,34 +20,10 @@ namespace MvcSpa.Data
         /// </summary>
         public Product Entity { get; set; }
 
-        /// <summary>
-        /// Indicates if product details area is visible.
-        /// </summary>
-        public bool IsDetailAreaVisible { get; set; }
-
-        /// <summary>
-        /// Indicates if the list of products area is visible.
-        /// </summary>
-        public bool IsListAreaVisible { get; set; }
-
-        /// <summary>
-        /// Indicates if search product area is visible.
-        /// </summary>
-        public bool IsSearchAreaVisible { get; set; }
-
-        /// <summary>
-        /// Indicates if the model is valid.
-        /// </summary>
-        public bool IsValid { get; set; }
-
-        /// <summary>
-        /// List of additional validation errors.
-        /// </summary>
-        public List<KeyValuePair<string, string>> ValidationErrors { get; set; }
-
         private ProductRepository _productRepository;
 
         public ProductViewModel()
+            : base()
         {
             //TODO use dependency injection.
             _productRepository = new ProductRepository();
@@ -71,61 +31,9 @@ namespace MvcSpa.Data
             Products = new List<Product>();
             SearchEntity = new SearchProductFilter();
             Entity = new Product();
-            ValidationErrors = new List<KeyValuePair<string, string>>();
-
-            EventCommand = EventCommandType.List;
-            EventArgument = null;
-            SetListVisibility();
         }
 
-        public void HandleRequest()
-        {
-            switch (EventCommand)
-            {
-                case EventCommandType.List:
-                case EventCommandType.Search:
-                case EventCommandType.Cancel:
-                    SetListVisibility();
-                    Get();
-                    break;
-                case EventCommandType.ResetSearch:
-                    SetListVisibility();
-                    ResetSearch();
-                    Get();
-                    break;
-                case EventCommandType.Add:
-                    Add();
-                    break;
-                case EventCommandType.Save:
-                    Save();
-                    break;
-                case EventCommandType.Edit:
-                    Edit();
-                    break;
-                case EventCommandType.Delete:
-                    Delete();
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void SetListVisibility()
-        {
-            IsValid = true;
-            IsSearchAreaVisible = true;
-            IsListAreaVisible = true;
-            IsDetailAreaVisible = false;
-        }
-
-        private void SetDetailsVisibility()
-        {
-            IsSearchAreaVisible = false;
-            IsListAreaVisible = false;
-            IsDetailAreaVisible = true;
-        }
-
-        private void Add()
+        protected override void Add()
         {
             IsValid = true;
             Entity = new Product
@@ -135,11 +43,10 @@ namespace MvcSpa.Data
                 Price = 0m
             };
 
-            SetDetailsVisibility();
-            Mode = DisplayMode.Add;
+            base.Add();
         }
 
-        private void Edit()
+        protected override void Edit()
         {
             IsValid = true;
             Guid productId;
@@ -148,22 +55,21 @@ namespace MvcSpa.Data
             if (Entity == null)
                 throw new Exception($"Product {EventArgument} not found.");
 
-            SetDetailsVisibility();
-            Mode = DisplayMode.Edit;
+            base.Edit();
         }
 
-        private void Delete()
+        protected override void Delete()
         {
             IsValid = true;
             Guid productId;
             Guid.TryParse(EventArgument, out productId);
             var isDeleted = _productRepository.Delete(productId);
-            SetListVisibility();
-            Mode = null;
+
             Get();
+            base.Delete();
         }
 
-        private void Save()
+        protected override void Save()
         {
             if (IsValid)
             {
@@ -177,29 +83,21 @@ namespace MvcSpa.Data
                 }
                 else
                     throw new Exception("Unknown mode during save");
-
-                IsValid = !ValidationErrors.Any();
             }
 
-            if (IsValid)
-            {
-                SetListVisibility();
-                Get();
-            }
-            else
-            {
-                SetDetailsVisibility();
-            }
+            base.Save();
         }
 
-        private void Get()
+        protected override void Get()
         {
             Products = _productRepository.Search(SearchEntity);
         }
 
-        private void ResetSearch()
+        protected override void ResetSearch()
         {
             SearchEntity = new SearchProductFilter();
+
+            base.ResetSearch();
         }
     }
 }
